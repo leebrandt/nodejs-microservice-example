@@ -1,0 +1,28 @@
+version: '3'
+
+services:
+  webapp:
+    build: ./webapp/
+    volumes:
+      - ./webapp:/app
+    ports:
+      - "3000:3000"
+  catalog-service:
+    build: ./catalog-service/
+    volumes:
+      - ./catalog-service:/app
+    ports:
+      - "3001:3001"
+  catalog-db:
+    image: postgres:14.4-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - db:/var/lib/postgresql/data
+volumes:
+  db:
+    driver: local

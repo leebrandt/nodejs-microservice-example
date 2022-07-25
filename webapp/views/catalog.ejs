@@ -1,0 +1,9 @@
+<h1>Catalog</h1>
+
+<% if(items){ %>
+<ul>
+  <% items.forEach(item => { %>
+    <li><a href="/product/<%= item.id %>"><%= item.name %></a></li>
+  <%})%>
+</ul>
+<% } %>
