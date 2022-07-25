@@ -33,7 +33,7 @@ interfaces:
       subdomain: app
 
 services:
-  catalog_service_db:
+  catalog-service-db:
     image: postgres:14.4-alpine
     interfaces: 
       postgres:
@@ -47,9 +47,9 @@ services:
       POSTGRES_PASSWORD: $({ secrets.catalog_db_pass })
       POSTGRES_DB: $({ secrets.catalog_db_name })
 
-  catalog_service:
+  catalog-service:
     depends_on:
-      - catalog_service_db
+      - catalog-service-db
     build:
       context: ./catalog-service
       args:
@@ -59,8 +59,8 @@ services:
         host: $({ secrets.catalog_service_host })
         port: 3001
     environment:
-      PORT: $({ services.catalog_service.interfaces.main.port })
-      DB_ADDR: $({ services.catalog_service_db.interfaces.postgres.url })/$({ secrets.catalog_db_name })
+      PORT: $({ services.catalog-service.interfaces.main.port })
+      DB_ADDR: $({ services.catalog-service-db.interfaces.postgres.url })/$({ secrets.catalog_db_name })
     debug:
       command: npm run start
       build:
@@ -73,7 +73,7 @@ services:
 
   app:
     depends_on:
-      - catalog_service
+      - catalog-service
     build:
       context: ./webapp
       args:
@@ -82,7 +82,7 @@ services:
       main: &app-port 3000
     environment:
       PORT: *app-port
-      API_ADDR: $({ services.catalog_service.interfaces.main.url })
+      API_ADDR: $({ services.catalog-service.interfaces.main.url })
     debug:
       build: 
         context: ./webapp
