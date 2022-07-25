@@ -1,0 +1,94 @@
+name: node-microservices-app
+description: sample app demonstrating a basic microservice in Nodejs
+keywords:
+  - Nodejs
+  - microservices
+  - express
+  - postgres
+
+secrets:
+  catalog_db_host:
+    description: host for the catalog database
+    default: localhost
+  catalog_db_name:
+    description: name of the catalog database
+    default: postgres
+  catalog_db_user:
+    description: main user for the catalog database
+    default: postgres
+  catalog_db_pass:
+    description: password for the catalog database user
+    default: postgres
+  catalog_service_host:
+    description: host for the catalog service
+    default: localhost
+  
+
+
+
+interfaces:
+  app:
+    url: $({ services.app.interfaces.main.url })
+    ingress:
+      subdomain: app
+
+services:
+  catalog_service_db:
+    image: postgres:14.4-alpine
+    interfaces: 
+      postgres:
+        host: $({ secrets.catalog_db_host })
+        port: 5432
+        username: $({ secrets.catalog_db_user })
+        password: $({ secrets.catalog_db_pass })
+        protocol: postgres
+    environment:
+      POSTGRES_USER: $({ secrets.catalog_db_user })
+      POSTGRES_PASSWORD: $({ secrets.catalog_db_pass })
+      POSTGRES_DB: $({ secrets.catalog_db_name })
+
+  catalog_service:
+    depends_on:
+      - catalog_service_db
+    build:
+      context: ./catalog-service
+      args:
+        NODE_ENV: production
+    interfaces:
+      main:
+        host: $({ secrets.catalog_service_host })
+        port: 3001
+    environment:
+      PORT: $({ services.catalog_service.interfaces.main.port })
+      DB_ADDR: $({ services.catalog_service_db.interfaces.postgres.url })/$({ secrets.catalog_db_name })
+    debug:
+      command: npm run start
+      build:
+        args:
+          NODE_ENV: development
+      volumes:
+        src:
+          mount_path: /app
+          host_path: ./catalog-service
+
+  app:
+    depends_on:
+      - catalog_service
+    build:
+      context: ./webapp
+      args:
+        NODE_ENV: production
+    interfaces:
+      main: &app-port 3000
+    environment:
+      PORT: *app-port
+      API_ADDR: $({ services.catalog_service.interfaces.main.url })
+    debug:
+      build: 
+        context: ./webapp
+        args:
+          NODE_ENV: development
+      volumes:
+        src:
+          mount_path: /app
+          host_path: ./webapp
