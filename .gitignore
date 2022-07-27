@@ -13,3 +13,6 @@ node_modules
 
 # Built Visual Studio Code Extensions
 *.vsix
+
+# The data folder to be used as a volume to save database
+/data/
