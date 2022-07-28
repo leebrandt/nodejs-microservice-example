@@ -1,7 +1,7 @@
 const { Pool } = require('pg')
 const creds = {
   user: 'postgres',
-  host: 'catalog-db',
+  host: process.env.DB_ADDR,
   database: 'postgres',
   password: 'postgres',
   port: 5432

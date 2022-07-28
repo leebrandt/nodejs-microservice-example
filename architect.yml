@@ -7,9 +7,6 @@ keywords:
   - postgres
 
 secrets:
-  catalog_db_host:
-    description: host for the catalog database
-    default: localhost
   catalog_db_name:
     description: name of the catalog database
     default: postgres
@@ -19,33 +16,38 @@ secrets:
   catalog_db_pass:
     description: password for the catalog database user
     default: postgres
-  catalog_service_host:
-    description: host for the catalog service
-    default: localhost
-  
-
-
 
 interfaces:
   app:
-    url: $({ services.app.interfaces.main.url })
+    url: ${{ services.app.interfaces.main.url }}
     ingress:
       subdomain: app
+  catalog-service:
+    url: ${{ services.catalog-service.interfaces.main.url }}
+    ingress:
+      subdomain: api
 
 services:
   catalog-service-db:
-    image: postgres:14.4-alpine
+    image: postgres
     interfaces: 
       postgres:
-        host: $({ secrets.catalog_db_host })
         port: 5432
-        username: $({ secrets.catalog_db_user })
-        password: $({ secrets.catalog_db_pass })
+        username: ${{ secrets.catalog_db_user }}
+        password: ${{ secrets.catalog_db_pass }}
         protocol: postgres
     environment:
-      POSTGRES_USER: $({ secrets.catalog_db_user })
-      POSTGRES_PASSWORD: $({ secrets.catalog_db_pass })
-      POSTGRES_DB: $({ secrets.catalog_db_name })
+      POSTGRES_USER: ${{ secrets.catalog_db_user }}
+      POSTGRES_PASSWORD: ${{ secrets.catalog_db_pass }}
+      POSTGRES_DB: ${{ secrets.catalog_db_name }}
+    debug:
+      volumes:
+        data:
+          mount_path: /var/lib/postgresql/data
+          host_path: ./data
+        initdb:
+          mount_path: /docker-entrypoint-initdb.d
+          host_path: ./sql
 
   catalog-service:
     depends_on:
@@ -56,11 +58,10 @@ services:
         NODE_ENV: production
     interfaces:
       main:
-        host: $({ secrets.catalog_service_host })
         port: 3001
     environment:
-      PORT: $({ services.catalog-service.interfaces.main.port })
-      DB_ADDR: $({ services.catalog-service-db.interfaces.postgres.url })/$({ secrets.catalog_db_name })
+      PORT: ${{ services.catalog-service.interfaces.main.port }}
+      DB_ADDR: ${{ services.catalog-service-db.interfaces.postgres.host }}
     debug:
       command: npm run start
       build:
@@ -82,7 +83,7 @@ services:
       main: &app-port 3000
     environment:
       PORT: *app-port
-      API_ADDR: $({ services.catalog-service.interfaces.main.url })
+      CATALOG_SVC_ADDR: ${{ services.catalog-service.interfaces.main.url }}
     debug:
       build: 
         context: ./webapp

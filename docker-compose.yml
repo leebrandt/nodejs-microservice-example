@@ -13,6 +13,8 @@ services:
       - ./catalog-service:/app
     ports:
       - "3001:3001"
+    environment:
+      - 
   catalog-db:
     image: postgres
     restart: always

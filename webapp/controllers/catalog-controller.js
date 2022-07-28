@@ -1,7 +1,7 @@
 const axios = require("axios");
 
 const axiosClient = axios.create({
-  baseURL: "http://catalog-service:3001",
+  baseURL: process.env.CATALOG_SVC_ADDR,
   headers: {
     Accept: "application/json",
     "Content-Type": "application/json",
