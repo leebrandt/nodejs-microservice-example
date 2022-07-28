@@ -7,6 +7,9 @@ services:
       - ./webapp:/app
     ports:
       - "3000:3000"
+    environment:
+      - CATALOG_SVC_ADDR=http://catalog-service:3001
+
   catalog-service:
     build: ./catalog-service/
     volumes:
@@ -14,7 +17,8 @@ services:
     ports:
       - "3001:3001"
     environment:
-      - 
+      - DB_ADDR=localhost
+
   catalog-db:
     image: postgres
     restart: always
@@ -26,6 +30,7 @@ services:
     volumes:
       - ./data:/var/lib/postgresql/data
       - ./sql/:/docker-entrypoint-initdb.d/
+      
 volumes:
   db:
     driver: local
