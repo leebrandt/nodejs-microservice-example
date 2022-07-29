@@ -40,14 +40,13 @@ services:
       POSTGRES_USER: ${{ secrets.catalog_db_user }}
       POSTGRES_PASSWORD: ${{ secrets.catalog_db_pass }}
       POSTGRES_DB: ${{ secrets.catalog_db_name }}
-    debug:
-      volumes:
-        data:
-          mount_path: /var/lib/postgresql/data
-          host_path: ./data
-        initdb:
-          mount_path: /docker-entrypoint-initdb.d
-          host_path: ./sql
+    volumes:
+      data:
+        mount_path: /var/lib/postgresql/data
+        host_path: ./data
+      initdb:
+        mount_path: /docker-entrypoint-initdb.d
+        host_path: ./sql
 
   catalog-service:
     depends_on:
