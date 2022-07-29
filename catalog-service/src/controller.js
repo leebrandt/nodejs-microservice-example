@@ -1,15 +1,10 @@
 const { Pool } = require('pg')
-const creds = {
-  user: 'postgres',
-  host: process.env.DB_ADDR,
-  database: 'postgres',
-  password: 'postgres',
-  port: 5432
-}
 
 const controllers = {
   getAll: async (req,res) => {
-    const pool =  new Pool(creds)
+    const pool = new Pool({
+      connectionString: process.env.DB_DSN,
+    });
     const response = await pool.query('SELECT * FROM products')
     await pool.end();
     if(response){
@@ -19,7 +14,9 @@ const controllers = {
   },
 
   getById: async (req,res) => {
-    const pool =  new Pool(creds)
+    const pool = new Pool({
+      connectionString: process.env.DB_DSN,
+    });
     const response = await pool.query('SELECT * FROM products WHERE id = ' + req.params.id)
     await pool.end();
     if(response.rows){
