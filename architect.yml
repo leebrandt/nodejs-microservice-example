@@ -43,10 +43,14 @@ services:
     volumes:
       data:
         mount_path: /var/lib/postgresql/data
-        host_path: ./data
       initdb:
         mount_path: /docker-entrypoint-initdb.d
-        host_path: ./sql
+    debug:
+      volumes:
+        data:
+          host_path: ./data
+        initdb:
+          host_path: ./sql
 
   catalog-service:
     depends_on:
@@ -60,16 +64,16 @@ services:
         port: 3001
     environment:
       PORT: ${{ services.catalog-service.interfaces.main.port }}
-      DB_ADDR: ${{ services.catalog-service-db.interfaces.postgres.host }}
+      DB_DSN: ${{ services.catalog-service-db.interfaces.postgres.url }}/${{ secrets.catalog_db_name }}
     debug:
-      command: npm run start
+      command: npm start
       build:
         args:
           NODE_ENV: development
       volumes:
         src:
-          mount_path: /app
-          host_path: ./catalog-service
+          mount_path: /app/src
+          host_path: ./catalog-service/src
 
   app:
     depends_on:
@@ -85,10 +89,9 @@ services:
       CATALOG_SVC_ADDR: ${{ services.catalog-service.interfaces.main.url }}
     debug:
       build: 
-        context: ./webapp
         args:
           NODE_ENV: development
       volumes:
         src:
-          mount_path: /app
-          host_path: ./webapp
+          mount_path: /app/src
+          host_path: ./webapp/src

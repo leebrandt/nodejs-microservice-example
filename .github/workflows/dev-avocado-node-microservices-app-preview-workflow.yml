@@ -1,9 +1,7 @@
 name: Architect Preview Deployment
 
 on:
-  pull_request_target:
-    branches:
-      - main
+  pull_request:
     types:
       - opened
       - synchronize
